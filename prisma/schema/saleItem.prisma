@@ -1,0 +1,13 @@
+model SaleItem {
+  id         Int     @id @default(autoincrement())
+  sale_id    Int
+  product_id Int
+  qty        Int
+  unit_price Decimal @db.Decimal(12, 2)
+  sub_total  Decimal @db.Decimal(12, 2)
+
+  sale    Sale    @relation(fields: [sale_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("sales_items")
+}

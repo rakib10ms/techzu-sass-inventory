@@ -1,0 +1,15 @@
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String // এটি অবশ্যই হ্যাশ করে সেভ করতে হবে
+
+  // কোম্পানির সাথে রিলেশন
+  company_id Int
+  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("users")
+}

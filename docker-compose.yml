@@ -1,0 +1,44 @@
+services:
+  # Database Service
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Express App Service
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - APPLICATION_PORT=${APPLICATION_PORT}
+      # নিচের ভলিউম সেকশনটি যোগ করুন
+    volumes:
+      - .:/app # আপনার লোকাল সব ফাইল কন্টেইনারের /app এ সিঙ্ক হবে
+      - /app/node_modules
+    depends_on:
+      - db
+
+  # pgAdmin Service (Notun add kora hoyeche)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: sass-inventory-pgadmin
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - '5050:80'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

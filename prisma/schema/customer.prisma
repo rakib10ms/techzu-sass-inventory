@@ -1,0 +1,16 @@
+model Customer {
+  id    Int    @id @default(autoincrement())
+  name  String
+  phone String
+
+  // আউটলেটের সাথে রিলেশন (যেহেতু কাস্টমার সাধারণত আউটলেট ভিত্তিক হয়)
+  outlet_id Int
+  outlet    Outlet @relation(fields: [outlet_id], references: [id], onDelete: Cascade)
+  sales Sale[]   // ✅ এটা add করো
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([phone, outlet_id]) // একই আউটলেটে একই ফোন নাম্বার দুইবার হবে না
+  @@map("customers")
+}

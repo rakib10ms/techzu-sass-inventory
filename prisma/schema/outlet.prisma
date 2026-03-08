@@ -1,0 +1,20 @@
+model Outlet {
+  id             Int        @id @default(autoincrement())
+  name           String
+  location       String?
+  phone          String?
+  receipt_prefix String     @unique
+  company_id     Int
+  company        Company    @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  customers      Customer[]
+
+  // ✅ এই লাইনটি যোগ করুন
+  outlet_products OutletProduct[]
+    sales           Sale[]          // ✅ এটা add করো
+
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("outlets")
+}
