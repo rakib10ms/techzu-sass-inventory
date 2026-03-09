@@ -12,223 +12,193 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🚀 Start seeding...');
+  console.log('🚀 Start seeding a full environment...');
 
-  // ─────────────────────────────────────────
-  // 1️⃣  COMPANY
-  // ─────────────────────────────────────────
+  const hashedPass = await bcrypt.hash('password123', 10);
+
+  const superAdminRole = await prisma.role.upsert({
+    where: { name: 'SUPERADMIN' },
+    update: {},
+    create: { name: 'SUPERADMIN', description: 'System Owner' },
+  });
+
+  const managerRole = await prisma.role.upsert({
+    where: { name: 'BRANCH_MANAGER' },
+    update: {},
+    create: { name: 'BRANCH_MANAGER', description: 'Outlet Manager' },
+  });
+
   const company = await prisma.company.upsert({
     where: { email: 'admin@rakibpos.com' },
     update: {},
-    create: {
-      name: 'Rakib Software Solutions',
-      email: 'admin@rakibpos.com',
-    },
+    create: { name: 'Rakib Enterprise', email: 'admin@rakibpos.com' },
   });
-  console.log(`✅ Company: ${company.name} (ID: ${company.id})`);
 
-  // ─────────────────────────────────────────
-  // 2️⃣  OUTLET
-  // ─────────────────────────────────────────
-  const outlet = await prisma.outlet.upsert({
+  const outlet1 = await prisma.outlet.upsert({
     where: { receipt_prefix: 'DHK-01' },
     update: {},
     create: {
-      name: 'Dhaka Main Branch',
+      name: 'Shop 1',
       location: 'Mirpur, Dhaka',
       phone: '01711111111',
       receipt_prefix: 'DHK-01',
       company_id: company.id,
     },
   });
-  console.log(`✅ Outlet: ${outlet.name} (ID: ${outlet.id})`);
-
-  // ─────────────────────────────────────────
-  // 3️⃣  USER (hashed password)
-  // ─────────────────────────────────────────
-  const hashedPassword = await bcrypt.hash('password123', 10);
-
-  const user = await prisma.user.upsert({
-    where: { email: 'rakib@rakibpos.com' },
+  const outlet2 = await prisma.outlet.upsert({
+    where: { receipt_prefix: 'CTG-01' },
     update: {},
     create: {
-      name: 'Rakib Admin',
-      email: 'rakib@rakibpos.com',
-      password: hashedPassword,
-      //   role: 'ADMIN',         // তোমার User model-এ role field থাকলে
-      company_id: company.id,
-    },
-  });
-  console.log(`✅ User: ${user.name} (ID: ${user.id})`);
-
-  // ─────────────────────────────────────────
-  // 4️⃣  CUSTOMER
-  // ─────────────────────────────────────────
-  const customer = await prisma.customer.upsert({
-    where: {
-      phone_outlet_id: {
-        // ✅ compound unique key
-        phone: '01911111111',
-        outlet_id: outlet.id,
-      },
-    },
-    update: {},
-    create: {
-      name: 'Walk-in Customer',
-      phone: '01911111111',
-      outlet_id: outlet.id,
-    },
-  });
-  console.log(`✅ Customer: ${customer.name} (ID: ${customer.id})`);
-
-  // ─────────────────────────────────────────
-  // 5️⃣  PRODUCTS (3টি)
-  // ─────────────────────────────────────────
-  const product1 = await prisma.product.upsert({
-    where: {
-      name_company_id: { name: 'Coca Cola 500ml', company_id: company.id },
-    },
-    update: {},
-    create: {
-      name: 'Coca Cola 500ml',
-      details: 'Cold drink 500ml bottle',
-      base_price: 40.0,
+      name: 'Shop 2',
+      location: 'Chittagonj, Dhaka',
+      phone: '01711111112',
+      receipt_prefix: 'CTG-01',
       company_id: company.id,
     },
   });
 
-  const product2 = await prisma.product.upsert({
-    where: {
-      name_company_id: { name: 'Lays Classic Chips', company_id: company.id },
-    },
+  // ─────────────────────────────────────────
+  // 4️⃣  USERS তৈরি (রোল, কোম্পানি এবং আউটলেট আইডি এখন হাতের কাছে আছে)
+  // ─────────────────────────────────────────
+
+  // Super Admin
+  const superAdmin = await prisma.user.upsert({
+    where: { email: 'superadmin@rakibpos.com' },
     update: {},
     create: {
-      name: 'Lays Classic Chips',
-      details: 'Classic salted potato chips 100g',
-      base_price: 30.0,
+      name: 'Rakib Super Admin',
+      email: 'superadmin@rakibpos.com',
+      password: hashedPass,
       company_id: company.id,
+      role_id: superAdminRole.id,
+      outlet_id: null, // সুপার অ্যাডমিনের কোনো আউটলেট নেই
     },
   });
 
-  const product3 = await prisma.product.upsert({
+  // Branch Manager
+  const branchManager = await prisma.user.upsert({
+    where: { email: 'manager@rakibpos.com' },
+    update: {},
+    create: {
+      name: 'Asif Manager',
+      email: 'manager@rakibpos.com',
+      password: hashedPass,
+      company_id: company.id,
+      role_id: managerRole.id,
+      outlet_id: outlet1.id, // নির্দিষ্ট আউটলেটে অ্যাসাইন করা হলো
+    },
+  });
+  console.log('✅ Users created with roles and outlets');
+
+  // ─────────────────────────────────────────
+  // 5️⃣  CUSTOMERS তৈরি
+  // ─────────────────────────────────────────
+  const customer1 = await prisma.customer.upsert({
     where: {
-      name_company_id: { name: 'Mineral Water 1L', company_id: company.id },
+      phone_outlet_id: { phone: '01711111111', outlet_id: outlet1.id },
     },
     update: {},
     create: {
-      name: 'Mineral Water 1L',
-      details: 'Pure mineral water 1 liter',
-      base_price: 20.0,
-      company_id: company.id,
+      name: 'Md Rohan Khan',
+      phone: '01711111111',
+      outlet_id: outlet1.id,
     },
   });
 
-  console.log(
-    `✅ Products created: ${product1.name}, ${product2.name}, ${product3.name}`
-  );
+  const customer2 = await prisma.customer.upsert({
+    where: {
+      phone_outlet_id: { phone: '01711111112', outlet_id: outlet2.id },
+    },
+    update: {},
+    create: {
+      name: 'Abu Hena',
+      phone: '01711111112',
+      outlet_id: outlet2.id,
+    },
+  });
+  console.log('✅ Customer created');
 
   // ─────────────────────────────────────────
-  // 6️⃣  OUTLET PRODUCTS (stock সহ)
+  // 6️⃣  PRODUCTS তৈরি (Company Level)
   // ─────────────────────────────────────────
-  const outletProductsData = [
-    {
-      outlet_id: outlet.id,
-      product_id: product1.id,
-      price: 45.0,
-      stock_quantity: 500,
-      min_stock_level: 50,
-      created_by: user.id,
-    },
-    {
-      outlet_id: outlet.id,
-      product_id: product2.id,
-      price: 35.0,
-      stock_quantity: 300,
-      min_stock_level: 30,
-      created_by: user.id,
-    },
-    {
-      outlet_id: outlet.id,
-      product_id: product3.id,
-      price: 25.0,
-      stock_quantity: 1000,
-      min_stock_level: 100,
-      created_by: user.id,
-    },
+  const productsData = [
+    { name: 'Coca Cola 500ml', base_price: 40 },
+    { name: 'Lays Classic Chips', base_price: 30 },
+    { name: 'Mineral Water 1L', base_price: 20 },
+    { name: 'Dairy Milk Chocolate', base_price: 80 },
+    { name: 'Basmati Rice 1kg', base_price: 150 },
   ];
 
-  for (const op of outletProductsData) {
-    await prisma.outletProduct.upsert({
+  const products = [];
+  for (const p of productsData) {
+    const prod = await prisma.product.upsert({
+      where: { name_company_id: { name: p.name, company_id: company.id } },
+      update: {},
+      create: { ...p, company_id: company.id },
+    });
+    products.push(prod);
+  }
+  console.log(`✅ ${products.length} Products created`);
+
+  // ─────────────────────────────────────────
+  // 7️⃣  OUTLET PRODUCTS (আউটলেটে মাল তোলা/Inventory)
+  // ─────────────────────────────────────────
+  const outletProds = [];
+  for (const p of products) {
+    const op = await prisma.outletProduct.upsert({
       where: {
-        outlet_id_product_id: {
-          outlet_id: op.outlet_id,
-          product_id: op.product_id,
-        },
+        outlet_id_product_id: { outlet_id: outlet1.id, product_id: p.id },
       },
       update: {},
-      create: op,
+      create: {
+        outlet_id: outlet1.id,
+        product_id: p.id,
+        price: Number(p.base_price) + 5,
+        stock_quantity: 100,
+        min_stock_level: 10,
+        created_by: superAdmin.id,
+      },
     });
+    outletProds.push(op);
   }
-  console.log(`✅ Outlet products created with stock`);
+  console.log('✅ Inventory updated for outlet');
 
+  // 8️⃣  PAST SALES (সঠিক রিলেশনসহ)
   // ─────────────────────────────────────────
-  // 7️⃣  SALE (একটা sample sale)
-  // ─────────────────────────────────────────
-  // ✅ prisma.sale exist করে কিনা check (migration না হলে skip)
-  if (!(prisma as any).sale) {
-    console.log(
-      '⚠️  Sale model not found — run migration first, then seed again'
-    );
-  } else {
-    const existingSale = await (prisma as any).sale.findFirst({
-      where: { outlet_id: outlet.id },
-    });
-
-    if (!existingSale) {
-      const saleItems = [
-        { product_id: product1.id, qty: 2, unit_price: 45.0, sub_total: 90.0 },
-        { product_id: product2.id, qty: 3, unit_price: 35.0, sub_total: 105.0 },
-      ];
-
-      const total_amount = saleItems.reduce((sum, i) => sum + i.sub_total, 0);
+  if ((prisma as any).sale) {
+    console.log('📊 Creating past sales...');
+    for (let i = 1; i <= 3; i++) {
+      const randomProduct =
+        outletProds[Math.floor(Math.random() * outletProds.length)];
 
       await (prisma as any).sale.create({
         data: {
-          outlet_id: outlet.id,
-          user_id: user.id,
-          customer_id: customer.id,
-          receipt_no: 'RCP-SEED-000001',
-          total_amount,
+          outlet_id: outlet1.id,
+          user_id: branchManager.id,
+          customer_id: customer1.id,
+          receipt_no: `RCP-OLD-00${i}`,
+          total_amount: Number(randomProduct.price) * 2,
           sales_items: {
-            create: saleItems,
+            create: [
+              {
+                // ✅ এখানে product_id এর বদলে outlet_product_id দিতে হবে
+                // অথবা রিলেশন কানেক্ট করতে হবে
+                outlet_product: { connect: { id: randomProduct.id } },
+                qty: 2,
+                unit_price: randomProduct.price,
+                sub_total: Number(randomProduct.price) * 2,
+              },
+            ],
           },
         },
       });
-
-      // stock deduct for seed sale
-      await prisma.outletProduct.updateMany({
-        where: { outlet_id: outlet.id, product_id: product1.id },
-        data: { stock_quantity: { decrement: 2 } },
-      });
-      await prisma.outletProduct.updateMany({
-        where: { outlet_id: outlet.id, product_id: product2.id },
-        data: { stock_quantity: { decrement: 3 } },
-      });
-
-      console.log('✅ Sample sale created with receipt: RCP-SEED-000001');
-    } else {
-      console.log('⏭️  Sale already exists, skipping');
     }
+    console.log('✅ Past sales data created');
   }
 
-  console.log('\n🎉 Seeding finished successfully!');
-  console.log('─────────────────────────────────────');
-  console.log(`🏢 Company ID : ${company.id}`);
-  console.log(`🏪 Outlet ID  : ${outlet.id}`);
-  console.log(`👤 User ID    : ${user.id}`);
-  console.log(`👥 Customer ID: ${customer.id}`);
-  console.log(`📦 Products   : ${product1.id}, ${product2.id}, ${product3.id}`);
-  console.log('─────────────────────────────────────');
+  console.log('\n🎉 Full Seeding Finished Successfully!');
+  console.log(`🔑 Superadmin: superadmin@rakibpos.com / password123`);
+  console.log(`🔑 Manager: manager@rakibpos.com / password123`);
 }
 
 main()
@@ -238,4 +208,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

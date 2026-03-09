@@ -4,30 +4,31 @@ import { sendResponse } from '../utils/apiResponse';
 import { CreateSaleSchema } from '../schemas/sale.dto';
 
 export const saleController = {
-  // POST /sales
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = CreateSaleSchema.parse(req.body);
-      const sale = await saleService.createSale(validatedData);
+      const result = await saleService.createSale(validatedData);
 
       sendResponse(res, {
         statusCode: 201,
         success: true,
         message: 'Sale created successfully',
-        data: sale,
+        data: {
+          sale: result.sale,
+          alerts:
+            result.stockAlerts.length > 0 ? result.stockAlerts : undefined, // স্টক অ্যালার্ট থাকলে দেখাবে
+        },
       });
     } catch (error) {
       next(error);
     }
   },
 
-  // GET /sales?outlet_id=1
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const outletId = req.query.outlet_id
         ? Number(req.query.outlet_id)
         : undefined;
-
       const sales = await saleService.getAllSales(outletId);
 
       sendResponse(res, {
@@ -40,7 +41,6 @@ export const saleController = {
       next(error);
     }
   },
-
   // GET /sales/:id
   getOne: async (
     req: Request<{ id: string }>,
@@ -62,7 +62,6 @@ export const saleController = {
     }
   },
 
-  // GET /sales/receipt/:receiptNo
   getByReceiptNo: async (
     req: Request<{ receiptNo: string }>,
     res: Response,
@@ -82,7 +81,6 @@ export const saleController = {
     }
   },
 
-  // DELETE /sales/:id  (stock ফেরত দেয়)
   delete: async (
     req: Request<{ id: string }>,
     res: Response,

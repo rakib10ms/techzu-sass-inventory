@@ -1,5 +1,6 @@
 
 FROM node:20-alpine
+RUN apk add --no-cache netcat-openbsd
 
 WORKDIR /app
 
@@ -13,7 +14,9 @@ RUN npm install --ignore-scripts
 RUN npx prisma generate --schema=./prisma/schema/
 
 COPY . .
+# entrypoint.sh ফাইলটিকে এক্সিকিউটেবল পারমিশন দেওয়া
+RUN chmod +x entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+ENTRYPOINT ["sh", "./entrypoint.sh"]

@@ -7,7 +7,6 @@ import {
 } from '../schemas/outletProduct.dto';
 
 export const outletProductController = {
-  // POST /outlet-products
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = CreateOutletProductSchema.parse(req.body);
@@ -25,7 +24,6 @@ export const outletProductController = {
     }
   },
 
-  // GET /outlet-products?outlet_id=1
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const outletId = req.query.outlet_id
@@ -46,7 +44,6 @@ export const outletProductController = {
     }
   },
 
-  // GET /outlet-products/:id
   getOne: async (
     req: Request<{ id: string }>,
     res: Response,
@@ -67,7 +64,6 @@ export const outletProductController = {
     }
   },
 
-  // PATCH /outlet-products/:id
   update: async (
     req: Request<{ id: string }>,
     res: Response,
@@ -103,7 +99,6 @@ export const outletProductController = {
     }
   },
 
-  // DELETE /outlet-products/:id
   delete: async (
     req: Request<{ id: string }>,
     res: Response,
@@ -123,7 +118,6 @@ export const outletProductController = {
     }
   },
 
-  // GET /outlet-products/low-stock?outlet_id=1
   getLowStock: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const outletId = req.query.outlet_id

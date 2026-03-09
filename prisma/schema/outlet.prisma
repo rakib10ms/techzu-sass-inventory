@@ -8,11 +8,10 @@ model Outlet {
   company        Company    @relation(fields: [company_id], references: [id], onDelete: Cascade)
   customers      Customer[]
 
-  // ✅ এই লাইনটি যোগ করুন
   outlet_products OutletProduct[]
-    sales           Sale[]          // ✅ এটা add করো
+  sales           Sale[]
 
-
+  users      User[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

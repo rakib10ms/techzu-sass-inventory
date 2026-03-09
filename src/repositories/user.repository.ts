@@ -14,10 +14,15 @@ export const userRepository = {
       include: { company: true },
     }),
 
-  findByEmail: async (email: string) =>
-    prisma.user.findUnique({
+  findByEmail: async (email: string) => {
+    return await prisma.user.findUnique({
       where: { email },
-    }),
+      include: {
+        role: true, // Role details (ADMIN, MANAGER etc) anbe
+        company: true, // Company details (Name, Email) anbe
+      },
+    });
+  },
 
   update: async (id: number, data: any) =>
     prisma.user.update({ where: { id }, data }),

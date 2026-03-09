@@ -6,7 +6,7 @@ model Customer {
   // আউটলেটের সাথে রিলেশন (যেহেতু কাস্টমার সাধারণত আউটলেট ভিত্তিক হয়)
   outlet_id Int
   outlet    Outlet @relation(fields: [outlet_id], references: [id], onDelete: Cascade)
-  sales Sale[]   // ✅ এটা add করো
+  sales     Sale[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

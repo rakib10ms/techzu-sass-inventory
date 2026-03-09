@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Create Outlet Schema
- */
 export const CreateOutletSchema = z.object({
   company_id: z
     .number({

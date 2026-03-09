@@ -1,7 +1,74 @@
+# services:
+#   # Database Service
+#   db:
+#     image: postgres:15-alpine
+#     restart: always
+#     environment:
+#       - POSTGRES_USER=${DB_USER}
+#       - POSTGRES_PASSWORD=${DB_PASSWORD}
+#       - POSTGRES_DB=${DB_NAME}
+#     ports:
+#       - '5432:5432'
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#   # Express App Service
+#   app:
+#     build: .
+#     ports:
+#       - '5000:5000'
+#     environment:
+#       - DATABASE_URL=${DATABASE_URL}
+#       - APPLICATION_PORT=${APPLICATION_PORT}
+#       - JWT_SECRET=${JWT_SECRET}
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     volumes:
+#       - .:/app
+#       - /app/node_modules
+#     depends_on:
+#       - db
+
+#   # React Client Service (Frontend)
+#   client:
+#     build:
+#       context: ./client
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3000:3000'
+#     volumes:
+#       - ./client:/app # Hot reload এর জন্য কোড মাউন্ট করা
+#       - /app/node_modules # কন্টেইনারের নোড মডিউল আলাদা রাখা
+#     environment:
+#       - REACT_APP_API_URL=http://localhost:5000/api
+#       - WDS_SOCKET_PORT=0 # Docker-এ Hot Reload এর বাগ ফিক্স করতে
+#     stdin_open: true # react-scripts এর জন্য দরকার
+#     tty: true # react-scripts এর জন্য দরকার
+#     depends_on:
+#       - app
+
+#   # pgAdmin Service
+#   pgadmin:
+#     image: dpage/pgadmin4
+#     container_name: sass-inventory-pgadmin
+#     restart: always
+#     environment:
+#       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+#       - PGADMIN_DEFAULT_PASSWORD=admin
+#     ports:
+#       - '5050:80'
+#     depends_on:
+#       - db
+
+# volumes:
+#   postgres_data:
+
 services:
-  # Database Service
+  # 1. Database Service
   db:
     image: postgres:15-alpine
+    container_name: sass-inventory-db
     restart: always
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -11,23 +78,52 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Express App Service
+  # 2. Express App Service (Backend)
   app:
     build: .
+    container_name: sass-inventory-app
     ports:
-      - '3000:3000'
+      - '5000:5000'
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - APPLICATION_PORT=${APPLICATION_PORT}
-      # নিচের ভলিউম সেকশনটি যোগ করুন
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
-      - .:/app # আপনার লোকাল সব ফাইল কন্টেইনারের /app এ সিঙ্ক হবে
+      - .:/app
       - /app/node_modules
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    # এক কমান্ডে মাইগ্রেশন, সিড এবং রান
+    command: sh -c "npx prisma migrate dev && npx prisma db seed && npm run dev"
 
-  # pgAdmin Service (Notun add kora hoyeche)
+  # 3. React Client Service (Frontend)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: sass-inventory-client
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+      - WDS_SOCKET_PORT=0
+      - WATCHPACK_POLLING=true
+    stdin_open: true
+    tty: true
+    depends_on:
+      - app
+
+  # 4. pgAdmin Service
   pgadmin:
     image: dpage/pgadmin4
     container_name: sass-inventory-pgadmin
@@ -38,7 +134,8 @@ services:
     ports:
       - '5050:80'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

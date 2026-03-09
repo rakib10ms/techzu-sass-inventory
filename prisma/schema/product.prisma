@@ -7,9 +7,7 @@ model Product {
   company    Company        @relation(fields: [company_id], references: [id], onDelete: Cascade)
   images     ProductImage[]
 
-  // ✅ এই লাইনটি যোগ করুন
   outlet_products OutletProduct[]
-  sale_items      SaleItem[]      // ✅ এটা add করো
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

@@ -36,7 +36,6 @@ export const companyController = {
     }
   },
 
-  // <{ id: string }> ব্যবহার করায় TS জানে params.id একটি string
   getOne: async (
     req: Request<{ id: string }>,
     res: Response,

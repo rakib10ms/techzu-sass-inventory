@@ -1,70 +1,79 @@
-# Getting Started with Create React App
+# 🚀 Centralized Multi-Outlet POS & Inventory System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A robust SaaS-based POS and Inventory management solution built for companies managing multiple outlets from a central HQ. This system focuses on multi-tenancy, data isolation, and a seamless user experience.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🏗️ Architecture Overview
 
-### `npm start`
+The project is built using a **Layered Architecture (N-Tier)** to ensure scalability and maintainability:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Routes:** API endpoint definitions.
+- **Controllers:** Request handling and response orchestration.
+- **Services:** Core business logic and rules.
+- **Repositories:** Persistent data access via **Prisma ORM**.
+- **Validation:** Schema-based validation using **Zod**.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠️ Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Backend:** Node.js, Express.js, TypeScript
+- **Database:** PostgreSQL (Prisma ORM)
+- **Frontend:** React.js (Material UI)
+- **Containerization:** Docker & Docker Compose
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚦 Getting Started (Installation)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 💡 Note for Reviewer
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+> **Plug-and-Play Setup:** To make the evaluation process easier for you, I have already **pre-configured the environment** and **seeded the database** with initial data (Users, Products, Sales, etc.). You don't need to manually run any seed scripts; Docker will handle everything during the first build.
 
-### `npm run eject`
+### 🛠️ Step-by-Step Setup
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1.  **Clone the repo:**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    ```bash
+    git clone <your-repo-url>
+    cd sass-inventory-assessment
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2.  **Environment Variables:**
+    I have provided a `.env`:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    _(The default values are optimized for the Docker environment)._
 
-## Learn More
+3.  **Run with Docker:**
+    Start the entire system with one command. This will automatically run migrations and seed the database for your convenience:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    ```bash
+    docker-compose up --build
+    ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+4.  **Access Links:**
+    - **Frontend:** [http://localhost:3000](http://localhost:3000)
+    - **Backend API:** [http://localhost:5000](http://localhost:5000)
+    - **pgAdmin:** [http://localhost:5050](http://localhost:5050)
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🔑 Demo Credentials (Pre-seeded)
 
-### Analyzing the Bundle Size
+Use these accounts to explore the system's role-based access control:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+| Role               | Email                     | Password      |
+| :----------------- | :------------------------ | :------------ |
+| **Super Admin**    | `superadmin@rakibpos.com` | `password123` |
+| **Branch Manager** | `manager@rakibpos.com`    | `password123` |
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📊 Database Design
 
-### Advanced Configuration
+The relational schema handles complex multi-outlet inventory tracking.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+![Database Design](./db-design.png)
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---

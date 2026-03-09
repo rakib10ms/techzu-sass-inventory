@@ -5,8 +5,6 @@ const router = Router();
 
 router.post('/', userController.create);
 router.get('/', userController.getAll);
-// router.get('/:id', userController.getOne);
-// router.patch('/:id', userController.update);
-// router.delete('/:id', userController.delete);
+router.post('/login', userController.login);
 
 export default router;

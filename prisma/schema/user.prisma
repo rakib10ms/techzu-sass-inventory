@@ -2,12 +2,19 @@ model User {
   id       Int    @id @default(autoincrement())
   name     String
   email    String @unique
-  password String // এটি অবশ্যই হ্যাশ করে সেভ করতে হবে
+  password String
 
-  // কোম্পানির সাথে রিলেশন
   company_id Int
-  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  sales      Sale[]
 
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  role_id         Int?
+  role            Role?           @relation(fields: [role_id], references: [id])
+  outlet_products OutletProduct[] // এটি যোগ করুন
+
+  outlet_id  Int? // '?' মানে এটি null হতে পারে
+  outlet     Outlet?  @relation(fields: [outlet_id], references: [id])
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

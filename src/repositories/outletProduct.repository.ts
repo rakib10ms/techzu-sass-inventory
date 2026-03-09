@@ -16,7 +16,6 @@ export const outletProductRepository = {
       },
     }),
 
-  // ✅ outlet_id দিয়ে filter, অথবা সব আনো
   findAll: async (outletId?: number) =>
     prisma.outletProduct.findMany({
       where: outletId ? { outlet_id: outletId } : {},
@@ -25,6 +24,7 @@ export const outletProductRepository = {
           include: { images: true },
         },
         outlet: true,
+        user: true,
       },
       orderBy: { created_at: 'desc' },
     }),
@@ -40,7 +40,6 @@ export const outletProductRepository = {
       },
     }),
 
-  // ✅ একই outlet-এ একই product আছে কিনা check করার জন্য
   findByOutletAndProduct: async (outletId: number, productId: number) =>
     prisma.outletProduct.findFirst({
       where: { outlet_id: outletId, product_id: productId },
@@ -60,7 +59,6 @@ export const outletProductRepository = {
 
   delete: async (id: number) => prisma.outletProduct.delete({ where: { id } }),
 
-  // ✅ স্টক কম আছে এমন products (stock_quantity <= min_stock_level)
   findLowStock: async (outletId?: number) =>
     prisma.outletProduct.findMany({
       where: {
