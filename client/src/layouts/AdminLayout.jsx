@@ -45,6 +45,8 @@ export default function AdminLayout() {
   const isSuperAdmin =
     user?.role?.name === 'SUPERADMIN' || user?.role?.name === 'ADMIN';
 
+  console.log('b', isSuperAdmin);
+
   // Active Item Styling Helper
   const getListItemStyle = (path) => ({
     mb: 0.5,

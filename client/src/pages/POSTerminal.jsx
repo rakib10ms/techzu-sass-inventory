@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import {
   Grid,
   Card,
@@ -42,10 +43,8 @@ export default function POSTerminal() {
 
     try {
       const [pRes, cRes] = await Promise.all([
-        axios.get(
-          `${API_URL}/api/outlet-products?outlet_id=${selectedOutletId}`
-        ),
-        axios.get(`${API_URL}/api/customers?outlet_id=${selectedOutletId}`),
+        api.get(`/api/outlet-products?outlet_id=${selectedOutletId}`),
+        api.get(`/api/customers?outlet_id=${selectedOutletId}`),
       ]);
       setProducts(pRes.data.data || []);
       setCustomers(cRes.data.data || []);
@@ -53,12 +52,12 @@ export default function POSTerminal() {
       console.error('Fetch Error:', error);
     }
   };
-
   useEffect(() => {
     if (user?.role?.name === 'SUPERADMIN') {
-      axios
-        .get(`${API_URL}/api/outlets`)
-        .then((res) => setOutlets(res.data.data || []));
+      api
+        .get('/api/outlets')
+        .then((res) => setOutlets(res.data.data || []))
+        .catch((err) => console.error('Outlet Fetch Error:', err));
     }
   }, [user]);
 
@@ -103,13 +102,13 @@ export default function POSTerminal() {
       user_id: Number(user.id),
       customer_id: Number(selectedCustomer.id),
       total_amount: Number(totalAmount),
-      // product_id: Number(item.id),
       product_id: Number(item.product_id),
       qty: Number(item.qty),
       unit_price: Number(item.price),
     };
+
     try {
-      await axios.post(`${API_URL}/api/sales`, payload);
+      await api.post('/api/sales', payload);
       alert('Sale Completed Successfully!');
       setCart([]);
       setSelectedCustomer(null);
@@ -117,11 +116,11 @@ export default function POSTerminal() {
     } catch (error) {
       console.error('Sale Error:', error.response?.data);
       alert(
-        error.response?.data?.message || 'Validation failed! Check console.'
+        error.response?.data?.message ||
+          'Transaction failed! Check server logs.'
       );
     }
   };
-
   const updateQty = (id, delta) => {
     setCart((prevCart) =>
       prevCart.map((item) => {

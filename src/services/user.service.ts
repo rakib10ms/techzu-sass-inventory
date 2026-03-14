@@ -46,7 +46,7 @@ export const userService = {
     // 3. Token toiri kora
     const token = jwt.sign(
       { id: user.id, role: user.role, outlet_id: user.outlet_id },
-      JWT_SECRET,
+      JWT_SECRET as string,
       { expiresIn: '1d' }
     );
 

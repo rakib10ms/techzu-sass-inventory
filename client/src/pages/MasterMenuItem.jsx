@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import {
   Card,
   CardContent,
@@ -26,17 +27,32 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { API_URL } from '../utils/apiUrl';
 
+import { AuthContext } from '../context/AuthContext';
 export default function MasterMenuItem() {
+  const { user } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
   const [form, setForm] = useState({ name: '', details: '', price: '' });
 
+  // const fetchProducts = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.get(`${API_URL}/api/products`);
+  //     setProducts(response.data.data || response.data);
+  //   } catch (error) {
+  //     console.error('Error fetching products:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/products`);
+      // api instance ব্যবহার করা হয়েছে, যা অটোমেটিক টোকেন পাঠাবে
+      const response = await api.get('/api/products');
       setProducts(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -60,14 +76,16 @@ export default function MasterMenuItem() {
     formData.append('name', form.name);
     formData.append('details', form.details);
     formData.append('base_price', form.price);
-    formData.append('company_id', 1);
+    // হার্ডকোড করা ১ এর বদলে ইউজারের কোম্পানির আইডি দিন
+    formData.append('company_id', user?.company_id || 1);
 
     for (let i = 0; i < selectedImages.length; i++) {
       formData.append('images', selectedImages[i]);
     }
 
     try {
-      await axios.post(`${API_URL}/api/products`, formData, {
+      // api.post ব্যবহার করা হয়েছে
+      await api.post('/api/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Product Created Successfully!');
@@ -75,21 +93,21 @@ export default function MasterMenuItem() {
       fetchProducts();
     } catch (error) {
       console.error('Error creating product:', error);
-      alert('Failed to create product');
+      alert(error.response?.data?.message || 'Failed to create product');
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`${API_URL}/api/products/${id}`);
+        await api.delete(`/api/products/${id}`);
         fetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
+        alert('Failed to delete product');
       }
     }
   };
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);

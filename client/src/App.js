@@ -21,22 +21,14 @@ export default function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
-                {/* <Route
-                  path="/"
-                  element={<Navigate to="/hq-dashboard" replace />}
-                /> */}
-
-                <Route path="/" element={<Login />} />
                 <Route path="/master-menu" element={<MasterMenuItem />} />
                 <Route path="/outlet-products" element={<OutletProducts />} />
                 <Route path="/sales-report" element={<SalesReport />} />
-
                 <Route path="/pos" element={<POS outletId={1} />} />
               </Route>
             </Route>
 
-            {/* 404 Page (Optional) */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

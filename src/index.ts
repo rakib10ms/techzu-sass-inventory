@@ -16,6 +16,7 @@ import reportRoutes from './routes/report.routes';
 import roleRouter from './routes/role.routes';
 import saleRouter from './routes/sale.routes';
 import { globalErrorHandler } from './middlewares/globalErrorhandler';
+import { authenticate } from './middlewares/auth.middleware';
 const app = express();
 const PORT = process.env.APPLICATION_PORT;
 
@@ -40,13 +41,13 @@ if (prisma) {
 app.listen(PORT, () => {
   console.log(`🚀 Server ready at: http://localhost:${PORT}`);
 });
-app.use('/api/products', productRouter);
-app.use('/api/outlet-products', outletProductRouter);
-app.use('/api/sales', saleRouter);
-app.use('/api/companies', companyRoutes);
-app.use('/api/outlets', outletRoutes);
+app.use('/api/products', authenticate, productRouter);
+app.use('/api/outlet-products', authenticate, outletProductRouter);
+app.use('/api/sales', authenticate, saleRouter);
+app.use('/api/companies', authenticate, companyRoutes);
+app.use('/api/outlets', authenticate, outletRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/customers', customerRouter);
-app.use('/api/reports', reportRoutes);
-app.use('/api/roles', roleRouter);
+app.use('/api/customers', authenticate, customerRouter);
+app.use('/api/reports', authenticate, reportRoutes);
+app.use('/api/roles', authenticate, roleRouter);
 app.use(globalErrorHandler);

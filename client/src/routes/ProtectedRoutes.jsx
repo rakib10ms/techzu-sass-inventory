@@ -1,10 +1,15 @@
-import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
-export default function ProtectedRoute() {
-  const { user } = useContext(AuthContext);
+const ProtectedRoute = () => {
+  const { user, loading } = useContext(AuthContext);
 
-  // ইউজার না থাকলে লগিন পেজে পাঠিয়ে দিবে, থাকলে চাইল্ড রাউট (Outlet) রেন্ডার করবে
+  // loading সত্য হলে কিছু দেখাবে না (Context cookie থেকে user load করছে)
+  if (loading) return null;
+
+  // user থাকলে ভেতরে যাবে, না থাকলে login এ পাঠাবে
   return user ? <Outlet /> : <Navigate to="/login" replace />;
-}
+};
+
+export default ProtectedRoute;

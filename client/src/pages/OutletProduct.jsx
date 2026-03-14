@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import {
   Card,
   CardContent,
@@ -46,9 +47,9 @@ export default function OutletProducts() {
     try {
       setLoading(true);
       const [opRes, masterRes, outletRes] = await Promise.all([
-        axios.get(`${API_URL}/api/outlet-products`),
-        axios.get(`${API_URL}/api/products`),
-        axios.get(`${API_URL}/api/outlets`),
+        api.get('/api/outlet-products'),
+        api.get('/api/products'),
+        api.get('/api/outlets'),
       ]);
       setOutletProducts(opRes.data.data || []);
       setMasterItems(masterRes.data.data || []);
@@ -59,7 +60,6 @@ export default function OutletProducts() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -77,7 +77,7 @@ export default function OutletProducts() {
     };
 
     try {
-      await axios.post(`${API_URL}/api/outlet-products`, payload);
+      await api.post('/api/outlet-products', payload);
       alert('Product Assigned Successfully!');
       setOpen(false);
       fetchData();
@@ -100,10 +100,8 @@ export default function OutletProducts() {
       )
     ) {
       try {
-        await axios.delete(`${API_URL}/api/outlet-products/${id}`);
-
+        await api.delete(`/api/outlet-products/${id}`);
         alert('Product removed from outlet successfully!');
-
         fetchData();
       } catch (error) {
         console.error('Error deleting outlet product:', error);
@@ -111,7 +109,6 @@ export default function OutletProducts() {
       }
     }
   };
-
   return (
     <Box sx={{ padding: '24px' }}>
       <Stack direction="row" justifyContent="space-between" mb={3}>

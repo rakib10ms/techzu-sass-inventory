@@ -7,29 +7,41 @@ import {
   Button,
   Typography,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const res = await login({ email, password });
 
-      if (res.user.role.name === 'SUPERADMIN') {
+      const role = res?.user?.role?.name;
+      if (role === 'SUPERADMIN') {
         navigate('/sales-report');
       } else {
         navigate('/pos');
       }
     } catch (error) {
-      alert('Invalid credentials or Server Error!');
+      console.error('Login Error:', error);
+      alert(
+        error.response?.data?.message || 'Invalid credentials or Server Error!'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
     <Box
       sx={{
@@ -66,11 +78,13 @@ export default function Login() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <TextField
                 label="Email"
+                type="email"
                 variant="outlined"
                 fullWidth
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
               />
               <TextField
                 label="Password"
@@ -80,20 +94,28 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
               />
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
                 size="large"
+                fullWidth
+                disabled={isSubmitting}
                 sx={{
                   marginTop: '8px',
                   paddingY: '12px',
                   fontWeight: 'bold',
                   textTransform: 'none',
+                  minHeight: '48px',
                 }}
               >
-                Login
+                {isSubmitting ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  'Login'
+                )}
               </Button>
             </Box>
           </form>

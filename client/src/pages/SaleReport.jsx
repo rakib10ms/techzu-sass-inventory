@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Divider,
 } from '@mui/material';
+import api from '../utils/api';
 import axios from 'axios';
 import { API_URL } from '../utils/apiUrl';
 import { AuthContext } from '../context/AuthContext';
@@ -34,9 +35,10 @@ export default function SalesReport() {
       setSelectedOutlet(initialOutlet);
 
       if (isAdmin) {
-        axios
-          .get(`${API_URL}/api/outlets`)
-          .then((res) => setOutlets(res.data.data || []));
+        api
+          .get('/api/outlets')
+          .then((res) => setOutlets(res.data.data || []))
+          .catch((err) => console.error('Outlets fetch error:', err));
       }
     }
   }, [user]);
@@ -44,12 +46,13 @@ export default function SalesReport() {
   const fetchReport = async () => {
     try {
       setLoading(true);
+
       let url =
         selectedOutlet === 'all'
-          ? `${API_URL}/api/reports/outlets`
-          : `${API_URL}/api/reports/outlets/${selectedOutlet}`;
+          ? '/api/reports/outlets'
+          : `/api/reports/outlets/${selectedOutlet}`;
 
-      const response = await axios.get(url);
+      const response = await api.get(url);
       setReportData(response.data.data);
     } catch (error) {
       console.error('Report Error:', error);
@@ -57,7 +60,6 @@ export default function SalesReport() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (selectedOutlet) fetchReport();
   }, [selectedOutlet]);

@@ -25,7 +25,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
-const API_URL = 'http://localhost:3000/api/products'; // আপনার ব্যাকএন্ড ইউআরএল দিন
+const API_URL = 'http://localhost:3000/api/products';
 
 export default function HQDashboard() {
   const [products, setProducts] = useState([]);
@@ -38,7 +38,7 @@ export default function HQDashboard() {
     try {
       setLoading(true);
       const response = await axios.get(API_URL);
-      setProducts(response.data.data || response.data); // API স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করুন
+      setProducts(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
